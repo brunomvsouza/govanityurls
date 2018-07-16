@@ -1,8 +1,7 @@
-host: rakyll.pizza
+host: go.bmvs.io
 
 paths:
-  /portmidi:
-    repo: https://github.com/rakyll/portmidi
-
-  /launchpad:
-    repo: https://github.com/rakyll/launchpad
+  /ynab:
+    repo: https://github.com/brunomvsouza/ynab.go
+  /iosrc:
+    repo: https://github.com/brunomvsouza/iosrc
