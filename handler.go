@@ -32,6 +32,7 @@ type handler struct {
 	host         string
 	cacheControl string
 	paths        pathConfigSet
+	ua           string
 }
 
 type pathConfig struct {
@@ -45,6 +46,7 @@ func newHandler(config []byte) (*handler, error) {
 	var parsed struct {
 		Host     string `yaml:"host,omitempty"`
 		CacheAge *int64 `yaml:"cache_max_age,omitempty"`
+		UA       string `yaml:"ua,omitempty"`
 		Paths    map[string]struct {
 			Repo    string `yaml:"repo,omitempty"`
 			Display string `yaml:"display,omitempty"`
@@ -54,7 +56,7 @@ func newHandler(config []byte) (*handler, error) {
 	if err := yaml.Unmarshal(config, &parsed); err != nil {
 		return nil, err
 	}
-	h := &handler{host: parsed.Host}
+	h := &handler{host: parsed.Host, ua: parsed.UA}
 	cacheAge := int64(86400) // 24 hours (in seconds)
 	if parsed.CacheAge != nil {
 		cacheAge = *parsed.CacheAge
@@ -121,12 +123,14 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Repo    string
 		Display string
 		VCS     string
+		UA      string
 	}{
 		Import:  h.Host(r) + pc.path,
 		Subpath: subpath,
 		Repo:    pc.repo,
 		Display: pc.display,
 		VCS:     pc.vcs,
+		UA:      h.ua,
 	}); err != nil {
 		http.Error(w, "cannot render the page", http.StatusInternalServerError)
 	}
@@ -141,9 +145,11 @@ func (h *handler) serveIndex(w http.ResponseWriter, r *http.Request) {
 	if err := indexTmpl.Execute(w, struct {
 		Host     string
 		Handlers []string
+		UA       string
 	}{
 		Host:     host,
 		Handlers: handlers,
+		UA:       h.ua,
 	}); err != nil {
 		http.Error(w, "cannot render the page", http.StatusInternalServerError)
 	}
@@ -159,6 +165,9 @@ func (h *handler) Host(r *http.Request) string {
 
 var indexTmpl = template.Must(template.New("index").Parse(`<!DOCTYPE html>
 <html>
+<head>
+` + analyticsIncl + `
+</head>
 <h1>{{.Host}}</h1>
 <ul>
 {{range .Handlers}}<li><a href="https://godoc.org/{{.}}">{{.}}</a></li>{{end}}
@@ -169,15 +178,26 @@ var indexTmpl = template.Must(template.New("index").Parse(`<!DOCTYPE html>
 var vanityTmpl = template.Must(template.New("vanity").Parse(`<!DOCTYPE html>
 <html>
 <head>
+` + analyticsIncl + `
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta name="go-import" content="{{.Import}} {{.VCS}} {{.Repo}}">
 <meta name="go-source" content="{{.Import}} {{.Display}}">
-<meta http-equiv="refresh" content="0; url=https://godoc.org/{{.Import}}/{{.Subpath}}">
+<meta http-equiv="refresh" content="5; url=https://godoc.org/{{.Import}}/{{.Subpath}}">
 </head>
 <body>
 Nothing to see here; <a href="https://godoc.org/{{.Import}}/{{.Subpath}}">see the package on godoc</a>.
 </body>
 </html>`))
+
+var analyticsIncl = `{{if .UA}}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{.UA}}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{.UA}}');
+</script>
+{{end}}`
 
 type pathConfigSet []pathConfig
 
