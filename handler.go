@@ -23,6 +23,8 @@ import (
 	"sort"
 	"strings"
 
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -103,6 +105,13 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if pc == nil {
 		http.NotFound(w, r)
 		return
+	}
+
+	ctx := appengine.NewContext(r)
+	err := incrementPackageCounts(ctx, r)
+	if err != nil {
+		log.Errorf(ctx, "cannot increment counts for %s -> %s",
+			r.URL.String(), err.Error())
 	}
 
 	w.Header().Set("Cache-Control", h.cacheControl)

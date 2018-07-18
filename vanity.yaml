@@ -1,4 +1,5 @@
 host: go.bmvs.io
+cache_max_age: 0
 
 paths:
   /ynab:
