@@ -166,18 +166,54 @@ func (h *handler) Host(r *http.Request) string {
 var indexTmpl = template.Must(template.New("index").Parse(`<!DOCTYPE html>
 <html>
 <head>
+<title>{{.Host}} packages</title>
+<style>
+body {
+  font-family: monospace;
+  text-align: center;
+}
+h1 {
+  font-size: 2.6em;
+  margin: 0;
+}
+ul {
+  font-size: 2em;
+  list-style: none;
+  margin: .7em .7em .4em .7em;
+  padding: 0;
+  text-align: left;
+  display: inline-block;
+}
+ul li {
+  margin: 0;
+  margin-bottom: .3em;
+  position: relative;
+}
+footer {
+  margin: 0;
+  font-size: 1em;
+}
+</style>
 ` + analyticsIncl + `
 </head>
+<body>
 <h1>{{.Host}}</h1>
-<ul>
-{{range .Handlers}}<li><a href="https://godoc.org/{{.}}">{{.}}</a></li>{{end}}
-</ul>
+<ul>{{range .Handlers}}<li><a href="https://godoc.org/{{.}}">{{.}}</a></li>{{end}}</ul>
+<footer>by <a href="https://brunosouza.org">@brunomvsouza</a></footer>
+</body>
 </html>
 `))
 
 var vanityTmpl = template.Must(template.New("vanity").Parse(`<!DOCTYPE html>
 <html>
 <head>
+<style>
+body {
+  font-family: monospace;
+  font-size: 1.3em;
+  text-align: center;
+}
+</style>
 ` + analyticsIncl + `
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta name="go-import" content="{{.Import}} {{.VCS}} {{.Repo}}">
@@ -189,15 +225,13 @@ Nothing to see here; <a href="https://godoc.org/{{.Import}}/{{.Subpath}}">see th
 </body>
 </html>`))
 
-var analyticsIncl = `{{if .UA}}
-<script async src="https://www.googletagmanager.com/gtag/js?id={{.UA}}"></script>
+var analyticsIncl = `{{if .UA}}<script async src="https://www.googletagmanager.com/gtag/js?id={{.UA}}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', '{{.UA}}');
-</script>
-{{end}}`
+</script>{{end}}`
 
 type pathConfigSet []pathConfig
 
