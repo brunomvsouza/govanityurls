@@ -10,4 +10,4 @@ paths:
   /orderedset:
     repo: https://github.com/brunomvsouza/orderedset.go
   /iosrc:
-    repo: https://github.com/brunomvsouza/iosrc
+    repo: https://github.com/brunomvsouza/iosrc.go
