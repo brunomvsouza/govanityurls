@@ -5,5 +5,9 @@ ua: UA-116901682-2
 paths:
   /ynab:
     repo: https://github.com/brunomvsouza/ynab.go
+  /orderedmap:
+    repo: https://github.com/brunomvsouza/orderedmap.go
+  /orderedset:
+    repo: https://github.com/brunomvsouza/orderedset.go
   /iosrc:
     repo: https://github.com/brunomvsouza/iosrc
